@@ -1,0 +1,1 @@
+@IF EXIST com.amanitadesign.GoogleExtension.swc DEL com.amanitadesign.GoogleExtension.swc
