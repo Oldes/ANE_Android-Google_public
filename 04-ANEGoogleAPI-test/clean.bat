@@ -1,1 +1,2 @@
-@IF EXIST .\Build\TestAndroidGooglePlayANE.apk DEL /F /Q .\Build\TestAndroidGooglePlayANE.apk
+@IF EXIST .\Build\TestAndroidGooglePlayANE.apk       DEL /F /Q .\Build\TestAndroidGooglePlayANE.apk
+@IF EXIST .\Build\TestAndroidGooglePlayANE-ARM64.apk DEL /F /Q .\Build\TestAndroidGooglePlayANE-ARM64.apk

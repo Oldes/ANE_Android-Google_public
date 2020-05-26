@@ -14,6 +14,8 @@ import java.util.TimerTask;
 import com.amanitadesign.GoogleExtension;
 import com.amanitadesign.GoogleExtensionContext;
 
+import androidx.core.content.pm.PackageInfoCompat;
+
 public class ObbExpansionsManager
 {
     private String packageName;
@@ -45,8 +47,9 @@ public class ObbExpansionsManager
         if (versionCode == 1) {
             try
             {
-                PackageInfo pInfo = this.context.getPackageManager().getPackageInfo(this.context.getPackageName(), 0);
-                versionCode = pInfo.versionCode;
+                PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+                long longVersionCode= PackageInfoCompat.getLongVersionCode(pInfo);
+                versionCode = (int) longVersionCode; // avoid huge version numbers and you will be ok
             }
             catch (PackageManager.NameNotFoundException e)
             {
@@ -189,7 +192,8 @@ public class ObbExpansionsManager
                 try
                 {
                     PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-                    versionCode = pInfo.versionCode;
+                    long longVersionCode= PackageInfoCompat.getLongVersionCode(pInfo);
+                    versionCode = (int) longVersionCode;
                 }
                 catch (PackageManager.NameNotFoundException e)
                 {
@@ -204,7 +208,8 @@ public class ObbExpansionsManager
                 try
                 {
                     PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-                    versionCode = pInfo.versionCode;
+                    long longVersionCode= PackageInfoCompat.getLongVersionCode(pInfo);
+                    versionCode = (int) longVersionCode;
                 }
                 catch (PackageManager.NameNotFoundException e)
                 {

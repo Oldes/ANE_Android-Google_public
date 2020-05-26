@@ -16,6 +16,8 @@
 
 package com.google.android.vending.licensing;
 
+import android.util.Log;
+
 import com.google.android.vending.licensing.util.Base64;
 import com.google.android.vending.licensing.util.Base64DecoderException;
 
@@ -89,6 +91,7 @@ public class AESObfuscator implements Obfuscator {
         }
         try {
             String result = new String(mDecryptor.doFinal(Base64.decode(obfuscated)), UTF8);
+            Log.d("PreferenceObfuscator", "unobfuscate... result: " + result);
             // Check for presence of header. This serves as a final integrity check, for cases
             // where the block size is correct during decryption.
             int headerIndex = result.indexOf(header+key);

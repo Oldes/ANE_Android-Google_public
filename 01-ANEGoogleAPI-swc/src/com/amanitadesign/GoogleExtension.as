@@ -200,6 +200,14 @@ package com.amanitadesign
 				extContext.call("signIn");
 			}
 		}
+
+		public function silentSignIn():void
+		{
+			if (GoogleExtension.isSupported)
+			{
+				extContext.call("silentSignIn");
+			}
+		}
 		
 		public function signOut():void
 		{

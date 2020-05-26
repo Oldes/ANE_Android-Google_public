@@ -25,6 +25,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import com.google.android.vending.expansion.downloader.Constants;
+
 /**
  * This service differs from IntentService in a few minor ways/ It will not
  * auto-stop itself after the intent is handled unless the target returns "true"
@@ -36,7 +38,6 @@ public abstract class CustomIntentService extends Service {
     private boolean mRedelivery;
     private volatile ServiceHandler mServiceHandler;
     private volatile Looper mServiceLooper;
-    private static final String LOG_TAG = "Amanita:CIS";
     private static final int WHAT_MESSAGE = -10;
 
     public CustomIntentService(String paramString) {
@@ -65,7 +66,6 @@ public abstract class CustomIntentService extends Service {
             localThread.interrupt();
         }
         this.mServiceLooper.quit();
-        Log.d(LOG_TAG, "onDestroy");
     }
 
     protected abstract void onHandleIntent(Intent paramIntent);
@@ -103,9 +103,9 @@ public abstract class CustomIntentService extends Service {
             CustomIntentService.this
                     .onHandleIntent((Intent) paramMessage.obj);
             if (shouldStop()) {
-                Log.d(LOG_TAG, "stopSelf");
+                Log.d(Constants.TAG, "stopSelf");
                 CustomIntentService.this.stopSelf(paramMessage.arg1);
-                Log.d(LOG_TAG, "afterStopSelf");
+                Log.d(Constants.TAG, "afterStopSelf");
             }
         }
     }

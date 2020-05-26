@@ -10,6 +10,8 @@ import com.adobe.fre.FREFunction;
 import com.adobe.fre.FREObject;
 import com.adobe.fre.FREWrongThreadException;
 
+import androidx.core.content.pm.PackageInfoCompat;
+
 public class GetPackageVersionCodeFunction implements FREFunction  {
 
 	@Override
@@ -20,7 +22,7 @@ public class GetPackageVersionCodeFunction implements FREFunction  {
 			Activity act = ctx.getActivity();
 			PackageManager pm = act.getPackageManager() ;
 			PackageInfo manager = pm.getPackageInfo(act.getPackageName(), PackageManager.GET_META_DATA);
-			result = FREObject.newObject(manager.versionCode);
+			result = FREObject.newObject(PackageInfoCompat.getLongVersionCode(manager));
 		} catch (FREWrongThreadException e) {
 			e.printStackTrace();
 		} catch (NameNotFoundException e) {

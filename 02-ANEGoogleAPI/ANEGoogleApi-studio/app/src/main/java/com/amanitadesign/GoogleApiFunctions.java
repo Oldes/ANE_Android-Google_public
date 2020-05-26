@@ -16,6 +16,7 @@ public class GoogleApiFunctions {
         public FREObject call(FREContext arg0, FREObject[] arg1) {
             try {
                 return FREObject.newObject(
+                        GoogleExtension.googleApiHelper != null &&
                         GoogleExtension.googleApiHelper.isSignInAvailable() );
             } catch (FREWrongThreadException e) {
                 e.printStackTrace();
@@ -26,14 +27,24 @@ public class GoogleApiFunctions {
     static public class SignInFunction implements FREFunction {
         @Override
         public FREObject call(FREContext arg0, FREObject[] arg1) {
-            GoogleExtension.googleApiHelper.signIn();
+            if (GoogleExtension.googleApiHelper != null)
+                GoogleExtension.googleApiHelper.signIn();
+            return null;
+        }
+    }
+    static public class SilentSignInFunction implements FREFunction {
+        @Override
+        public FREObject call(FREContext arg0, FREObject[] arg1) {
+            if (GoogleExtension.googleApiHelper != null)
+                GoogleExtension.googleApiHelper.silentSignIn();
             return null;
         }
     }
     static public class SignOutFunction implements FREFunction {
         @Override
         public FREObject call(FREContext arg0, FREObject[] arg1) {
-            GoogleExtension.googleApiHelper.signOut();
+            if (GoogleExtension.googleApiHelper != null)
+                GoogleExtension.googleApiHelper.signOut();
             return null;
         }
     }
@@ -70,9 +81,7 @@ public class GoogleApiFunctions {
         public FREObject call(FREContext arg0, FREObject[] arg1) {
             try
             {
-                String id = arg1[0].getAsString();
-                double percent = arg1[1].getAsDouble();
-                GoogleExtension.googleApiHelper.reportAchievement(id, percent);
+                GoogleExtension.googleApiHelper.showAchievements();
             }
             catch (Exception e)
             {
@@ -105,7 +114,7 @@ public class GoogleApiFunctions {
                 String name = arg1[0].getAsString();
                 if(name == null) return null;
 
-                SavedGame save = GoogleExtension.googleApiHelper.readSnapshot(name);
+                SavedGame save = GoogleExtension.googleApiHelper.getSavedGame(name);
                 if(save != null) {
                     byte[] saveData = save.getData();
                     if(saveData != null) {
@@ -127,8 +136,6 @@ public class GoogleApiFunctions {
     static public class WriteSnapshot implements FREFunction {
         @Override
         public FREObject call(FREContext arg0, FREObject[] arg1) {
-            GoogleExtension.extensionContext.createHelperIfNeeded(arg0.getActivity());
-
             try {
                 String name = arg1[0].getAsString();
                 FREByteArray data = (FREByteArray) arg1[1];
@@ -141,7 +148,7 @@ public class GoogleApiFunctions {
                 byte[] bytes = new byte[(int) data.getLength()];
                 bb.get(bytes);
 
-                //Log.d("WriteSnapshot", "name: "+ name +" bytes: "+ bytes.length+" time: "+time);
+                if(GoogleExtension.VERBOSE>2) Log.d("Amanita", "WriteSnapshot name: "+ name +" bytes: "+ bytes.length+" time: "+time);
                 data.release();
                 GoogleExtension.googleApiHelper.saveSnapshot(name, bytes, time);
             } catch (Exception e) {

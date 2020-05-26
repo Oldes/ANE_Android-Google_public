@@ -9,12 +9,9 @@
  */
 package com.amanitadesign;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.amanitadesign.billing.BillingFunctions;
 import com.amanitadesign.expansion.Downloader;
 import com.amanitadesign.expansion.ExpansionFunctions;
 import com.amanitadesign.expansion.ExpansionObbListener;
@@ -33,20 +30,6 @@ import com.amanitadesign.functions.CheckLicenseFunction;
 import com.amanitadesign.functions.FollowLastLicensingURL;
 import com.amanitadesign.functions.GetPackageVersionCodeFunction;
 import com.amanitadesign.functions.InitFunction;
-import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.Purchase.PurchasesResult;
-import com.android.billingclient.api.PurchasesUpdatedListener;
-import com.android.billingclient.api.SkuDetails;
-import com.android.billingclient.api.SkuDetailsParams;
-import com.android.billingclient.api.SkuDetailsResponseListener;
-import com.android.billingclient.api.BillingClient.BillingResponse;
-import com.android.billingclient.api.BillingClient.SkuType;
-import com.android.billingclient.api.BillingClientStateListener;
-import com.android.billingclient.api.BillingFlowParams;
-import com.android.billingclient.api.ConsumeResponseListener;
-
-import com.google.android.gms.games.SnapshotsClient;
-import com.google.android.gms.games.snapshot.Snapshot;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -62,8 +45,6 @@ import com.adobe.air.AndroidActivityWrapper.ActivityState;
 import com.adobe.air.StateChangeCallback;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.games.Games;
-import com.google.android.gms.tasks.Task;
 
 public class GoogleExtensionContext extends FREContext implements
 	ActivityResultCallback,
@@ -74,7 +55,6 @@ public class GoogleExtensionContext extends FREContext implements
 	//ConsumeResponseListener
 {
 	public static final String TAG = "AmanitaContext";
-	private static GoogleApiHelper mGoogleApiHelper = null;
 	private AndroidActivityWrapper aaw = null;
 	private static GoogleExtensionContext instance = null;
 	private static Downloader loader = null;
@@ -87,7 +67,7 @@ public class GoogleExtensionContext extends FREContext implements
 	private final int RC_SHOW_ACHIEVEMENTS = 4237;
 	final int MAX_SNAPSHOT_RESOLVE_RETRIES = 3;
 	
-	public static final String ON_BILLING = "ON_BILLING"; 
+	public static final String ON_BILLING = "ON_BILLING";
 
 	public GoogleExtensionContext()
 	{
@@ -112,6 +92,7 @@ public class GoogleExtensionContext extends FREContext implements
 	{
 		return instance;
 	}
+
 	public static Activity getMainActivity()
 	{
 		return GoogleExtension.extensionContext.getActivity();
@@ -139,6 +120,13 @@ public class GoogleExtensionContext extends FREContext implements
 	public static int getPatchNumber()
 	{
 		return patchNumber;
+	}
+
+	public Activity getActivity() {
+		if (aaw != null) {
+			return aaw.getActivity();
+		}
+		return null;
 	}
 
 	@Override
@@ -175,6 +163,7 @@ public class GoogleExtensionContext extends FREContext implements
 
 		functions.put("isGameHelperAvailable", new GoogleApiFunctions.IsGameHelperAvailableFunction());
 		functions.put("signIn", new GoogleApiFunctions.SignInFunction());
+		functions.put("silentSignIn", new GoogleApiFunctions.SilentSignInFunction());
 		functions.put("signOut", new GoogleApiFunctions.SignOutFunction());
 		functions.put("isSignedIn", new GoogleApiFunctions.IsSignedInFunction());
 		functions.put("reportAchievement", new GoogleApiFunctions.ReportAchievementFunction());
@@ -203,21 +192,14 @@ public class GoogleExtensionContext extends FREContext implements
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-
+		if(GoogleExtension.VERBOSE>0) Log.d(TAG, "onActivityResult: "+ requestCode +" "+ resultCode );
 		GoogleExtension.log("ExtensionContext.onActivityResult" +
 				" requestCode:" + Integer.toString(requestCode) +
 				" resultCode:" + Integer.toString(resultCode));
 
-//		if (requestCode == RC_SHOW_ACHIEVEMENTS && resultCode == GamesActivityResultCodes.RESULT_RECONNECT_REQUIRED)
-//		{
-//			mHelper.disconnect();
-//			mHelper = null;
-//			dispatchEvent("ON_SIGN_OUT_SUCCESS");
-//		}
-//		else if (mHelper != null)
-//		{
-//			mHelper.onActivityResult(requestCode, resultCode, intent);
-//		}
+		if (GoogleExtension.googleApiHelper != null) {
+			GoogleExtension.googleApiHelper.onActivityResult(requestCode, resultCode, intent);
+		}
 	}
 
 	@Override
@@ -230,14 +212,14 @@ public class GoogleExtensionContext extends FREContext implements
 			case STOPPED:
 			case DESTROYED:
 		}
-		Log.d(TAG, "onActivityStateChanged: "+ state);
+		if(GoogleExtension.VERBOSE>0) Log.d(TAG, "onActivityStateChanged: "+ state);
 	}
 	@Override
 	public void onConfigurationChanged(Configuration paramConfiguration) {
 	}
 
 	public void logEvent(String eventName) {
-		Log.i(TAG, eventName);
+		if(GoogleExtension.VERBOSE>0) Log.i(TAG, eventName);
 	}
 
     public void dispatchEvent(String eventName) {
@@ -246,10 +228,7 @@ public class GoogleExtensionContext extends FREContext implements
 	public void dispatchEvent(String eventName, String eventData)
 	{
 		//logEvent(eventName);
-		if (eventData == null)
-		{
-			eventData = "OK";
-		}
+		if (eventData == null) eventData = "OK";
 		dispatchStatusEventAsync(eventName, eventData);
 	}
 
@@ -267,157 +246,6 @@ public class GoogleExtensionContext extends FREContext implements
 		return true;
 	}
 
-	public GoogleApiHelper createHelperIfNeeded(Activity activity)
-	{
-		if (mGoogleApiHelper == null)
-		{
-			logEvent("create helper");
-			mGoogleApiHelper = new GoogleApiHelper(getActivity());
-		}
-		return mGoogleApiHelper;
-	}
-
-
-
-/* usused code:
-
-	private List<Activity> _activityInstances;
-	public void registerActivity(Activity activity)
-	{
-		if (_activityInstances == null)
-		{
-			_activityInstances = new ArrayList<Activity>();
-		}
-		_activityInstances.add(activity);
-	}
-
-
-	//Create a HashMap
-	private Map <String, SavedGame> mSaveGamesData =  new HashMap<String, SavedGame>();
-
-	public void openSnapshot(String name) {
-		if(!mHelper.isSignedIn()) {
-			dispatchEvent("openSnapshotFailed", name +" user not connected!");
-			return;
-		}
-		SavedGame save = mSaveGamesData.get(name);
-		if(save == null) {
-			save = new SavedGame(name, null, -3);
-			mSaveGamesData.put(name, save);
-		}
-
-		if(save.isOpening) return;
-
-		save.isOpening = true;
-
-		AsyncTask<SavedGame, Void, Snapshots.OpenSnapshotResult> task =
-				new AsyncTask<SavedGame, Void, Snapshots.OpenSnapshotResult>() {
-					@Override
-					protected Snapshots.OpenSnapshotResult doInBackground(SavedGame... params) {
-					  //  Log.d(TAG, "...OpenSnapshotResult 0");
-						SavedGame save = params[0];
-						if(!isSignedIn()) {
-							if(save != null) save.dispose();
-							return null;
-						}
-						String name = save.getName();
-						Snapshots.OpenSnapshotResult result = Games.Snapshots.open(getApiClient(),
-							   name, true).await();
-					  //  Log.d(TAG, "...OpenSnapshotResult: "+ result+" "+save+" signed: "+isSignedIn());
-
-
-
-						Snapshot snapshot = processSnapshotOpenResult(result, 0);
-						save.isOpening = false;
-
-						if(snapshot == null) {
-							dispatchEvent("openSnapshotFailed", name +" "+result.getStatus());
-						} else {
-							save.setSnapshot(snapshot);
-							if(save.needsDelete) {
-								deleteSnapshot(save.getName());
-							} else {
-								try {
-									SnapshotContents content = snapshot.getSnapshotContents();
-									if(content != null) save.setData(snapshot.getSnapshotContents().readFully());
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
-
-								if (save.needsWrite) {
-									//dispatchEvent("openSnapshotForWrite", name);
-									writeSnapshotData(snapshot, save);
-								} else {
-									dispatchEvent("openSnapshotReady", name);
-								}
-							}
-						}
-						return result;
-					}
-				};
-
-		task.execute(save);
-	}
-
-
-
-
-
-
-//	
-//	  Conflict resolution for when Snapshots are opened.
-//	  @param result The open snapshot result to resolve on open.
-//	  @return The opened Snapshot on success; otherwise, returns null.
-//	 
-	private Snapshot processSnapshotOpenResult(Snapshots.OpenSnapshotResult result, int retryCount){
-		Snapshot mResolvedSnapshot;
-		retryCount++;
-		int status = result.getStatus().getStatusCode();
-
-		//Log.i(TAG, "processSnapshotOpenResult status: " + status);
-
-		if (status == GamesStatusCodes.STATUS_OK) {
-			return result.getSnapshot();
-		} else if (status == GamesStatusCodes.STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE) {
-			return result.getSnapshot();
-		} else if (status == GamesStatusCodes.STATUS_SNAPSHOT_CONFLICT){
-			Snapshot snapshot = result.getSnapshot();
-			Snapshot conflictSnapshot = result.getConflictingSnapshot();
-
-			// Resolve between conflicts by selecting the newest of the conflicting snapshots.
-			mResolvedSnapshot = snapshot;
-			Log.d(TAG, "Resolving conflict!");
-			Log.d(TAG, "LastModified: "+ snapshot.getMetadata().getLastModifiedTimestamp()  +" < "
-					+ conflictSnapshot.getMetadata().getLastModifiedTimestamp() );
-			Log.d(TAG, "PlayedTime: "+ snapshot.getMetadata().getPlayedTime()  +" < "
-					+ conflictSnapshot.getMetadata().getPlayedTime() );
-
-			if (snapshot.getMetadata().getLastModifiedTimestamp() <
-					conflictSnapshot.getMetadata().getLastModifiedTimestamp()){
-				mResolvedSnapshot = conflictSnapshot;
-			}
-
-			try {
-				Snapshots.OpenSnapshotResult resolveResult = Games.Snapshots.resolveConflict(
-					getApiClient(), result.getConflictId(), mResolvedSnapshot)
-					.await();
-				if (retryCount < MAX_SNAPSHOT_RESOLVE_RETRIES){
-					return processSnapshotOpenResult(resolveResult, retryCount);
-				}else{
-					String message = "Could not resolve snapshot conflicts";
-					Log.e(TAG, message);
-					//Toast.makeText(getBaseContext(), message, Toast.LENGTH_LONG);
-				}
-			} catch (Exception e) {
-				Log.e(TAG, "resolveConflict failed with: "+ e);
-			}
-		}
-		// Fail, return null.
-		return null;
-	}
-
-
-*/
 
 	/**************************************************************************************/
 	/*         BILLING ********************************************************************/

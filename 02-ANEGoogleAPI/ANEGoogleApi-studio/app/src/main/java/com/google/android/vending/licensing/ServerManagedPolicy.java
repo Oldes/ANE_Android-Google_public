@@ -43,7 +43,7 @@ import com.google.android.vending.licensing.util.URIQueryDecoder;
  */
 public class ServerManagedPolicy implements Policy {
 
-    private static final String TAG = "ServerManagedPolicy";
+    private static final String TAG = "AmanitaSerManPol";
     private static final String PREFS_FILE = "com.google.android.vending.licensing.ServerManagedPolicy";
     private static final String PREF_LAST_RESPONSE = "lastResponse";
     private static final String PREF_VALIDITY_TIMESTAMP = "validityTimestamp";
@@ -202,7 +202,7 @@ public class ServerManagedPolicy implements Policy {
             // No response or not parsable, expire immediately
             Log.w(TAG, "License retry timestamp (GT) missing, grace period disabled");
             retryUntil = "0";
-            lRetryUntil = 0l;
+            lRetryUntil = 0L;
         }
 
         mRetryUntil = lRetryUntil;

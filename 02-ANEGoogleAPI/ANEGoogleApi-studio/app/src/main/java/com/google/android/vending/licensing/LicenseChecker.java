@@ -16,10 +16,12 @@
 
 package com.google.android.vending.licensing;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Handler;
@@ -40,11 +42,15 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
+
+import androidx.core.content.pm.PackageInfoCompat;
 
 /**
  * Client library for Google Play license verifications.
@@ -58,7 +64,7 @@ import java.util.Set;
  * public key is obtainable from the publisher site.
  */
 public class LicenseChecker implements ServiceConnection {
-    private static final String TAG = "LicenseChecker";
+    private static final String TAG = "AmanitaLicenseChecker";
 
     private static final String KEY_FACTORY_ALGORITHM = "RSA";
 
@@ -67,6 +73,7 @@ public class LicenseChecker implements ServiceConnection {
 
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final boolean DEBUG_LICENSE_ERROR = false;
+    private static final SimpleDateFormat df = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
 
     private ILicensingService mService;
 
@@ -208,6 +215,9 @@ public class LicenseChecker implements ServiceConnection {
         }
         Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(licensingUrl));
         marketIntent.setPackage("com.android.vending");
+        if (!(context instanceof Activity)) {
+            marketIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         context.startActivity(marketIntent);
     }
 
@@ -290,10 +300,9 @@ public class LicenseChecker implements ServiceConnection {
                         if (logResponse) {
                             String android_id = Secure.getString(mContext.getContentResolver(),
                                     Secure.ANDROID_ID);
-                            Date date = new Date();
                             Log.d(TAG, "Server Failure: " + stringError);
                             Log.d(TAG, "Android ID: " + android_id);
-                            Log.d(TAG, "Time: " + date.toGMTString());
+                            Log.d(TAG, "Time: " + df.format(Calendar.getInstance().getTime()));
                         }
                     }
 
@@ -380,8 +389,9 @@ public class LicenseChecker implements ServiceConnection {
      */
     private static String getVersionCode(Context context, String packageName) {
         try {
-            return String.valueOf(
-                    context.getPackageManager().getPackageInfo(packageName, 0).versionCode);
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            long longVersionCode = PackageInfoCompat.getLongVersionCode(pInfo);
+            return String.valueOf(longVersionCode);
         } catch (NameNotFoundException e) {
             Log.e(TAG, "Package not found. could not get version code.");
             return "";

@@ -1,6 +1,6 @@
 package com.amanitadesign;
 
-//import android.util.Log;
+import android.util.Log;
 
 import com.google.android.gms.games.snapshot.Snapshot;
 
@@ -24,14 +24,14 @@ public class SavedGame {
         return mName;
     }
     public byte[] getData() {
-        //Log.d("SaveGame", mName+ " getData: "+mData);
+        if(GoogleExtension.VERBOSE>2) Log.d("AmanitaSaveGame", mName+ " getData: "+mData);
         return mData;
     }
     public long getTime() {
         return mTime;
     }
     public void setData(byte[] data) {
-        //Log.d("SaveGame", mName+ " setData: "+data);
+        if(GoogleExtension.VERBOSE>2) Log.d("AmanitaSaveGame", mName+ " setData: "+data);
         mData = data;
     }
     public void clearData() {
@@ -66,7 +66,7 @@ public class SavedGame {
                 + " time: " + mTime
                 + " opening: " + isOpening
                 + " needsWrite: " + needsWrite
-                + " mSnapshot: "+(mSnapshot == null ? "null" : !mSnapshot.getSnapshotContents().isClosed());
+                + " mSnapshot: "+ mSnapshot;
     }
     public void dispose() {
         mData = null;

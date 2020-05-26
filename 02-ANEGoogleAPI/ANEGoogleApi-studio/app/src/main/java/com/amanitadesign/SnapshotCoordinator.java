@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+//import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -63,7 +64,7 @@ public class SnapshotCoordinator {
 
     private static final SnapshotCoordinator theInstance = new SnapshotCoordinator();
 
-    private static final String TAG = "SnapshotCoordinator";
+    private static final String TAG = "AmanitaSnapshotCoor";
 
     /**
      * Singleton for coordinating the Snapshots API.  This is important since
@@ -228,8 +229,9 @@ public class SnapshotCoordinator {
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                Log.d(TAG, "Closed " + snapshot.getMetadata().getUniqueName());
                                 setClosed(snapshot.getMetadata().getUniqueName());
+                                if(GoogleExtension.VERBOSE>2) Log.d(TAG, "Closed " + snapshot);
+
                             }
                         });
             }
@@ -250,9 +252,9 @@ public class SnapshotCoordinator {
                     SnapshotsClient.DataOrConflict<Snapshot> result
                             = task.getResult();
                     if (result.isConflict()) {
-                        Log.d(TAG, "Open successful: " + filename + ", but with a conflict");
+                        if(GoogleExtension.VERBOSE>2) Log.d(TAG, "Open successful: " + filename + ", but with a conflict");
                     } else {
-                        Log.d(TAG, "Open successful: " + filename);
+                        if(GoogleExtension.VERBOSE>2) Log.d(TAG, "Open successful: " + filename);
                     }
                 }
             }
@@ -357,7 +359,7 @@ public class SnapshotCoordinator {
                             @Override
                             public void onComplete(@NonNull Task<SnapshotMetadata> task) {
                                 // even if commit and close fails, the file is closed.
-                                Log.d(TAG, "CommitAndClose complete, closing " +
+                                if(GoogleExtension.VERBOSE>2) Log.d(TAG, "CommitAndClose complete, closing " +
                                         filename);
                                 setClosed(filename);
                             }
@@ -384,6 +386,7 @@ public class SnapshotCoordinator {
         return source.getTask().continueWithTask(new Continuation<Void, Task<String>>() {
             @Override
             public Task<String> then(@NonNull Task<Void> task) throws Exception {
+
                 return snapshotsClient.delete(snapshotMetadata)
                         .addOnCompleteListener(new OnCompleteListener<String>() {
                             @Override

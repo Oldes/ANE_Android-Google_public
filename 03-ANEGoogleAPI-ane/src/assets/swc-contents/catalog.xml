@@ -1,0 +1,94 @@
+<?xml version="1.0" ?>
+<swc xmlns="http://www.adobe.com/flash/swccatalog/9">
+    <versions>
+        <swc version="1.2"/>
+        <compiler name="ActionScript Compiler" version="2.0.0" build="354209"/>
+    </versions>
+    <features>
+        <feature-script-deps/>
+    </features>
+    <libraries>
+        <library path="library.swf">
+            <script name="com/amanitadesign/GoogleExtension" mod="1572602946015">
+                <def id="com.amanitadesign:GoogleExtension"/>
+                <dep id="ArgumentError" type="s"/>
+                <dep id="Boolean" type="s"/>
+                <dep id="Error" type="s"/>
+                <dep id="Function" type="s"/>
+                <dep id="NaN" type="e"/>
+                <dep id="Number" type="s"/>
+                <dep id="Object" type="i"/>
+                <dep id="String" type="s"/>
+                <dep id="com.amanitadesign.events:AirBillingEvent" type="e"/>
+                <dep id="com.amanitadesign.events:AirGooglePlayGamesEvent" type="e"/>
+                <dep id="com.amanitadesign.events:ExpansionProgressEvent" type="e"/>
+                <dep id="com.amanitadesign.events:ExpansionStateEvent" type="e"/>
+                <dep id="com.amanitadesign.events:ExpansionStatusEvent" type="e"/>
+                <dep id="com.amanitadesign.events:LicenseStatusEvent" type="e"/>
+                <dep id="com.amanitadesign.events:VolumeEvent" type="e"/>
+                <dep id="flash.errors:IllegalOperationError" type="s"/>
+                <dep id="flash.events:ErrorEvent" type="e"/>
+                <dep id="flash.events:Event" type="e"/>
+                <dep id="flash.events:EventDispatcher" type="i"/>
+                <dep id="flash.events:StatusEvent" type="s"/>
+                <dep id="flash.external:ExtensionContext" type="s"/>
+                <dep id="flash.filesystem:File" type="e"/>
+                <dep id="flash.net:SharedObject" type="e"/>
+                <dep id="flash.system:Capabilities" type="e"/>
+                <dep id="flash.utils:ByteArray" type="s"/>
+                <dep id="int" type="s"/>
+                <dep id="isNaN" type="e"/>
+                <dep id="trace" type="e"/>
+                <dep id="uint" type="e"/>
+            </script>
+            <script name="com/amanitadesign/events/AirBillingEvent" mod="1561102527970">
+                <def id="com.amanitadesign.events:AirBillingEvent"/>
+                <dep id="Boolean" type="s"/>
+                <dep id="String" type="s"/>
+                <dep id="flash.events:Event" type="i"/>
+            </script>
+            <script name="com/amanitadesign/events/AirGooglePlayGamesEvent" mod="1561102527974">
+                <def id="com.amanitadesign.events:AirGooglePlayGamesEvent"/>
+                <dep id="Boolean" type="s"/>
+                <dep id="String" type="s"/>
+                <dep id="flash.events:Event" type="i"/>
+            </script>
+            <script name="com/amanitadesign/events/ExpansionProgressEvent" mod="1561102527979">
+                <def id="com.amanitadesign.events:ExpansionProgressEvent"/>
+                <dep id="String" type="s"/>
+                <dep id="flash.events:Event" type="i"/>
+            </script>
+            <script name="com/amanitadesign/events/ExpansionStateEvent" mod="1561102527984">
+                <def id="com.amanitadesign.events:ExpansionStateEvent"/>
+                <dep id="String" type="s"/>
+                <dep id="flash.events:Event" type="i"/>
+                <dep id="int" type="s"/>
+                <dep id="parseInt" type="e"/>
+            </script>
+            <script name="com/amanitadesign/events/ExpansionStatusEvent" mod="1561102527988">
+                <def id="com.amanitadesign.events:ExpansionStatusEvent"/>
+                <dep id="Array" type="e"/>
+                <dep id="String" type="s"/>
+                <dep id="flash.events:Event" type="i"/>
+                <dep id="trace" type="e"/>
+            </script>
+            <script name="com/amanitadesign/events/LicenseStatusEvent" mod="1561102527993">
+                <def id="com.amanitadesign.events:LicenseStatusEvent"/>
+                <dep id="Boolean" type="s"/>
+                <dep id="String" type="s"/>
+                <dep id="flash.events:Event" type="i"/>
+                <dep id="trace" type="e"/>
+            </script>
+            <script name="com/amanitadesign/events/VolumeEvent" mod="1561102527997">
+                <def id="com.amanitadesign.events:VolumeEvent"/>
+                <dep id="Boolean" type="s"/>
+                <dep id="Number" type="s"/>
+                <dep id="String" type="s"/>
+                <dep id="flash.events:Event" type="i"/>
+            </script>
+            <digests>
+                <digest type="SHA-256" signed="false" value="75ef84ffe66832b3de51261add32133e2bd32f5f6f83fb27bf90773e3ee26eab"/>
+            </digests>
+        </library>
+    </libraries>
+</swc>

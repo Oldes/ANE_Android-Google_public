@@ -2,7 +2,7 @@
 <application xmlns="http://ns.adobe.com/air/application/32.0">
 	
 	<id>com.amanitadesign.TestAmanitaAndroidANE</id>
-	<versionNumber>0.1.4</versionNumber>
+	<versionNumber>0.1.6</versionNumber>
 	<supportedProfiles>mobileDevice</supportedProfiles>
 	<filename>TestAmanitaAndroidANE</filename>
 	
@@ -20,17 +20,41 @@
 			<uses-permission android:name="com.android.vending.CHECK_LICENSE"/>
 
 			<uses-permission android:name="com.android.vending.BILLING" />
+
+
+			<!-- Required to download files from Google Play -->
+			<uses-permission android:name="android.permission.INTERNET" />
+
+			<!-- Required to keep CPU alive while downloading files (NOT to keep screen awake) -->
+			<uses-permission android:name="android.permission.WAKE_LOCK" />
+
+			<!-- Required to poll the state of the network connection and respond to changes -->
+			<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+			<!-- Required to check whether Wi-Fi is enabled -->
+			<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+
+
+			<!-- Required to read and write the expansion files on shared storage -->
+			<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+			<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 			
 			<application android:enabled="true">
-			  <activity android:excludeFromRecents="false" >
-				<intent-filter>
-				  <action android:name="android.intent.action.MAIN"/>
-				  <category android:name="android.intent.category.LAUNCHER"/>
-				</intent-filter>
-			  </activity>
+				<receiver android:name="com.amanitadesign.expansion.AlarmReceiver"/>
+				<service android:name="com.amanitadesign.expansion.ObbDownloaderService" />
+			 	<activity android:excludeFromRecents="false" >
+					<intent-filter>
+						<action android:name="android.intent.action.MAIN"/>
+				  		<category android:name="android.intent.category.LAUNCHER"/>
+					</intent-filter>
+			  	</activity>
 
-			  <!-- required for billing dialog -->
-			  <activity android:name="com.android.billingclient.api.ProxyBillingActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
+				<activity android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
+				android:screenOrientation="portrait"
+				android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
+
+
+				<!-- required for billing dialog -->
+				<activity android:name="com.android.billingclient.api.ProxyBillingActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
 		
 
 				<!-- GooglePlay Games Services -->
@@ -111,5 +135,6 @@
 	-->
   <extensions>
    <extensionID>com.amanitadesign.GoogleExtension</extensionID>
+   <!--<extensionID>com.amanitadesign.AndroidCommon</extensionID>-->	
   </extensions>
 </application>

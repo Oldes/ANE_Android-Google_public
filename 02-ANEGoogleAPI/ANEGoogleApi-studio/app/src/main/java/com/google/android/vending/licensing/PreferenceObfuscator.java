@@ -55,6 +55,7 @@ public class PreferenceObfuscator {
         String value = mPreferences.getString(key, null);
         if (value != null) {
             try {
+                Log.d(TAG, "unobfuscate: " + value + " key: " + key);
                 result = mObfuscator.unobfuscate(value, key);
             } catch (ValidationException e) {
                 // Unable to unobfuscate, data corrupt or tampered

@@ -33,7 +33,7 @@ import java.security.SignatureException;
  * and process the response.
  */
 class LicenseValidator {
-    private static final String TAG = "LicenseValidator";
+    private static final String TAG = "AmanitaLicenseValidator";
 
     // Server response codes.
     private static final int LICENSED = 0x0;
@@ -88,6 +88,7 @@ class LicenseValidator {
      */
     public void verify(PublicKey publicKey, int responseCode, String signedData, String signature) {
         String userId = null;
+        Log.d(TAG, "Verify responseCode: "+responseCode);
         // Skip signature check for unsuccessful requests
         ResponseData data = null;
         if (responseCode == LICENSED || responseCode == NOT_LICENSED ||

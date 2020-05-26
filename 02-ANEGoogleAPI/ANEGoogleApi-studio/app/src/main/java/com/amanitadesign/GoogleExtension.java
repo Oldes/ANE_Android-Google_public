@@ -26,10 +26,10 @@ import com.google.android.vending.licensing.ServerManagedPolicy;
  * Created by Oldes on 9/16/2016.
  */
 public class GoogleExtension implements FREExtension {
-    public static final String TAG = "AmanitaNativeExtension";
-    public static final int VERBOSE = 3;
+    public static final String TAG = "AmanitaGoogleAPI";
+    public static final int VERBOSE = 0;
 
-    private static byte[] SALT = new byte[] {
+    public static byte[] SALT = new byte[] {
             -9, -101, -2, 6, -7, 11, 124, 9, 2, -95, -34, 112, 33, -40, 76, -47, 21, -9, 46, 43
     };
 
@@ -50,6 +50,7 @@ public class GoogleExtension implements FREExtension {
         return res.getString(res.getIdentifier(id, "string", appContext.getPackageName()));
     }
     static public int getResourceStringID(String id) {
+        if(VERBOSE>2) Log.d(TAG, "getResourceStringID: "+ id);
         return appContext.getResources().getIdentifier(id, "string", appContext.getPackageName());
     }
     static public int getResource(String defType, String id) {
@@ -77,7 +78,7 @@ public class GoogleExtension implements FREExtension {
     public static void init(Activity activity, byte salt0) {
         appContext = activity.getApplicationContext();
         deviceId = Settings.Secure.getString(appContext.getContentResolver(), Settings.Secure.ANDROID_ID);
-        SALT[0] = salt0;
+        //SALT[0] = salt0;
         mAPKExpansionPolicy = new APKExpansionPolicy( appContext, new AESObfuscator(SALT, appContext.getPackageName(), deviceId));
         mAPKServerPolicy = new ServerManagedPolicy( appContext, new AESObfuscator(SALT, appContext.getPackageName(), deviceId));
         googleApiHelper = new GoogleApiHelper(activity);
@@ -133,15 +134,18 @@ public class GoogleExtension implements FREExtension {
             status = apiException.getStatusCode();
         }
         Log.i(TAG, "handleException status: " + status);
+        exception.printStackTrace();
 
         String message = details + " (status "+ status +"). "+ exception;
 
         Activity activity = GoogleExtensionContext.getMainActivity();
 
+        /*
         new AlertDialog.Builder(activity)
                 .setMessage(message)
                 .setNeutralButton(android.R.string.ok, null)
                 .show();
+         */
         // Note that showing a toast is done here for debugging. Your application should
         // resolve the error appropriately to your app.
         if (status == GamesClientStatusCodes.SNAPSHOT_NOT_FOUND) {
@@ -157,9 +161,5 @@ public class GoogleExtension implements FREExtension {
             Toast.makeText(activity.getBaseContext(), "Error: Snapshot folder unavailable.",
                     Toast.LENGTH_SHORT).show();
         }
-        if (details == "openSnapshotFailed") {
-            extensionContext.dispatchEvent("openSnapshotFailed", googleApiHelper.getCurrentSaveName() +" "+status);
-        }
-
     }
 }

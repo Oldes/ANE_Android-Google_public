@@ -1,13 +1,18 @@
 package com.amanitadesign.expansion;
 
+import com.amanitadesign.GoogleExtension;
 import com.google.android.vending.expansion.downloader.impl.DownloaderService;
 
+/**
+ * This class demonstrates the minimal client implementation of the
+ * DownloaderService from the Downloader library.
+ */
 public class ObbDownloaderService
         extends DownloaderService
 {
+    // stuff for LVL -- MODIFY FOR YOUR APPLICATION!
     public static String BASE64_PUBLIC_KEY = "YourLVLKey";
-    public static final byte[] SALT = { 1, 42, -12, -1, 54, 98,
-            -100, -12, 43, 2, -8, -4, 9, 5, -106, -107, -33, 45, -1, 84 };
+
 
     public String getPublicKey()
     {
@@ -16,7 +21,7 @@ public class ObbDownloaderService
 
     public byte[] getSALT()
     {
-        return SALT;
+        return GoogleExtension.SALT;
     }
 
     public String getAlarmReceiverClassName()

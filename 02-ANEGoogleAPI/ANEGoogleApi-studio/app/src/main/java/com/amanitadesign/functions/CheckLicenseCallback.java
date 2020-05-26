@@ -1,6 +1,8 @@
 package com.amanitadesign.functions;
 
 
+import android.util.Log;
+
 import com.amanitadesign.GoogleExtension;
 import com.google.android.vending.licensing.LicenseCheckerCallback;
 import com.google.android.vending.licensing.Policy;
@@ -67,6 +69,8 @@ public class CheckLicenseCallback implements LicenseCheckerCallback{
 
 	@Override
 	public void allow(int reason) {
+		Log.d("Amanita", "CheckLicenseCallback.allow: "+reason+" getExpansionURLCount: "+GoogleExtension.mAPKExpansionPolicy.getExpansionURLCount());
+
 		GoogleExtension.notifyLicenseStatus(LICENSE_STATUS, EMPTY_STRING);
 		
 	}
