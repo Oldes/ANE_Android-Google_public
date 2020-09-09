@@ -1,11 +1,15 @@
 package com.amanitadesign;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Build;
+import android.os.Environment;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,6 +24,10 @@ import com.google.android.vending.licensing.APKExpansionPolicy;
 import com.google.android.vending.licensing.LicenseChecker;
 import com.google.android.vending.licensing.ServerManagedPolicy;
 
+import java.io.File;
+
+import static android.provider.Settings.Secure.*;
+
 //import androidx.appcompat.app.AlertDialog;
 
 /**
@@ -27,7 +35,7 @@ import com.google.android.vending.licensing.ServerManagedPolicy;
  */
 public class GoogleExtension implements FREExtension {
     public static final String TAG = "AmanitaGoogleAPI";
-    public static final int VERBOSE = 0;
+    public static final int VERBOSE = 3;
 
     public static byte[] SALT = new byte[] {
             -9, -101, -2, 6, -7, 11, 124, 9, 2, -95, -34, 112, 33, -40, 76, -47, 21, -9, 46, 43
@@ -75,13 +83,31 @@ public class GoogleExtension implements FREExtension {
         }
     }
 
+    @SuppressLint("HardwareIds")
     public static void init(Activity activity, byte salt0) {
         appContext = activity.getApplicationContext();
-        deviceId = Settings.Secure.getString(appContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+        deviceId = getString(appContext.getContentResolver(), ANDROID_ID);
         //SALT[0] = salt0;
-        mAPKExpansionPolicy = new APKExpansionPolicy( appContext, new AESObfuscator(SALT, appContext.getPackageName(), deviceId));
-        mAPKServerPolicy = new ServerManagedPolicy( appContext, new AESObfuscator(SALT, appContext.getPackageName(), deviceId));
-        googleApiHelper = new GoogleApiHelper(activity);
+        Log.i(TAG, "appContext:"+ appContext);
+        Log.i(TAG, "deviceId:"+ deviceId);
+        try {
+            AESObfuscator obfus = new AESObfuscator(SALT, appContext.getPackageName(), deviceId);
+            mAPKExpansionPolicy = new APKExpansionPolicy(appContext, obfus);
+            mAPKServerPolicy = new ServerManagedPolicy(appContext, obfus);
+            googleApiHelper = new GoogleApiHelper(activity);
+        } catch(Exception e) {
+            Log.e(TAG, "*** init failed!");
+            e.printStackTrace();
+        }
+        if(VERBOSE > 2) {
+            Log.i(TAG, "ExternalFilesDir: "+ appContext.getExternalFilesDir(null));
+            Log.i(TAG, "ExternalCacheDir: "+ appContext.getExternalCacheDir());
+            Log.i(TAG, "OBBDir:           "+ appContext.getObbDir());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                Log.i(TAG, "ExternalMediaDirs: "+ appContext.getExternalMediaDirs());
+            }
+            Log.i(TAG, "googleApiHelper: "+ googleApiHelper);
+        }
     }
 
     @Override
@@ -161,5 +187,10 @@ public class GoogleExtension implements FREExtension {
             Toast.makeText(activity.getBaseContext(), "Error: Snapshot folder unavailable.",
                     Toast.LENGTH_SHORT).show();
         }
+    }
+    @SuppressWarnings( "deprecation" )
+    public static File getLegacyExternalStorageDirectory() {
+        // for API18 and older... deprecated since API29
+        return Environment.getExternalStorageDirectory();
     }
 }

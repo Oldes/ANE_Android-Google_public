@@ -11,6 +11,7 @@ package
 	import flash.ui.Multitouch;
 	import flash.ui.MultitouchInputMode;
 	import flash.utils.ByteArray;
+	import flash.filesystem.File;
 	
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
@@ -34,6 +35,7 @@ package
 		public var tf:TextField;
 		private var nextBtnX:Number = 20;
 		private static const MainOBBVersion:int = 1006;
+		private static const gei:GoogleExtension = GoogleExtension.instance;
 
 		private static const GPPublicKey:String = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApQBTNw7DW6+ygMMO41nN1d4cRpNYa5rdyreUXsZmmLbWPMdd0tTj20GzWrwHcee792cbizGuiQIdejUx11rsHbHxr/nMdmwlb3q6T1kh3yXbuwp39ctLTkS2k8jHiWBB5XHv63dC6wi/cSjyErujobOTZwjMourrxJ4TTSdbG4ZmEUg00AJelhjRKKSzmQJU7rX7ZlxfNuqKXhKc4WO/M77Y7SUUYbaqTuhO89Pjz2AZc/Jo+T1umlBCjxIs386bgtXaii6ROO6gYR72Pgx4ahpn+kF00nmofehEp/czr939Qk2XL4V8cipIipsHRcv/jDiwr9R4OdAFg3Hjv1t8yQIDAQAB";
 			
@@ -92,27 +94,29 @@ package
 			addButton("BEER", beerTest)
 			addButton("QuerySKU", querySKUTest)
 */
-			
+
 			log("Testing Amanita Android ANE...");
 			log("GoogleExtension is supported: " + GoogleExtension.isSupported);
-			//log(GoogleExtension.instance.hello());
+			log("isGameHelperAvailable: " + gei.isGameHelperAvailable());
+			log("getPackageName: "+ gei.getPackageName());
+			//log(gei.hello());
 
-			GoogleExtension.instance.addEventListener(ErrorEvent.ERROR, GPErrorHandler);
-			GoogleExtension.instance.addEventListener(LicenseStatusEvent.STATUS, GPLicenseResult);
-			GoogleExtension.instance.checkLicense(GPPublicKey);
+			gei.addEventListener(ErrorEvent.ERROR, GPErrorHandler);
+			gei.addEventListener(LicenseStatusEvent.STATUS, GPLicenseResult);
+			gei.checkLicense(GPPublicKey);
 
 
-//			log("Is billing ready? "+ GoogleExtension.instance.billingReady()+" <- should be false here.");
+//			log("Is billing ready? "+ gei.billingReady()+" <- should be false here.");
 			
 			log("\nGooglePlay signin test...");
-			GoogleExtension.instance.addEventListener(AirGooglePlayGamesEvent.ON_SIGN_IN_SUCCESS, GPSonSignInSuccess);
-			GoogleExtension.instance.addEventListener(AirGooglePlayGamesEvent.ON_SIGN_OUT_SUCCESS, GPSonSignOutSuccess);
-			GoogleExtension.instance.addEventListener(AirGooglePlayGamesEvent.ON_SIGN_IN_FAIL, GPSonSignInFail);
+			gei.addEventListener(AirGooglePlayGamesEvent.ON_SIGN_IN_SUCCESS, GPSonSignInSuccess);
+			gei.addEventListener(AirGooglePlayGamesEvent.ON_SIGN_OUT_SUCCESS, GPSonSignOutSuccess);
+			gei.addEventListener(AirGooglePlayGamesEvent.ON_SIGN_IN_FAIL, GPSonSignInFail);
 
-			GoogleExtension.instance.addEventListener(AirGooglePlayGamesEvent.ON_OPEN_SNAPSHOT_READY, GPSonSnapshotOpen);
-			GoogleExtension.instance.addEventListener(AirGooglePlayGamesEvent.ON_OPEN_SNAPSHOT_FAILED, GPSonSnapshotOpen);
+			gei.addEventListener(AirGooglePlayGamesEvent.ON_OPEN_SNAPSHOT_READY, GPSonSnapshotOpen);
+			gei.addEventListener(AirGooglePlayGamesEvent.ON_OPEN_SNAPSHOT_FAILED, GPSonSnapshotOpen);
 
-			GoogleExtension.instance.silentSignIn();
+			gei.silentSignIn();
 
 		}
 		
@@ -136,47 +140,47 @@ package
 		
 		public function doGPsignIn(e:MouseEvent=null):void {
 			log("GoogleExtension.instance.signIn()");
-			GoogleExtension.instance.signIn();
+			gei.signIn();
 		}
 
 		public function doGPsignOut(e:MouseEvent=null):void {
 			log("GoogleExtension.instance.signOut()");
-			GoogleExtension.instance.signOut();
+			gei.signOut();
 		}
 		public function doGPisSigned(e:MouseEvent=null):void {
-			log("isSignedIn reports: "+GoogleExtension.instance.isSignedIn());
+			log("isSignedIn reports: "+gei.isSignedIn());
 		}
 
 		public function doGPShowAchievements(e:MouseEvent=null):void {
 			log("GoogleExtension.instance.showStandardAchievements()");
-			GoogleExtension.instance.showStandardAchievements();
+			gei.showStandardAchievements();
 		}
 
 		public function doGPLoadSnapshot(e:MouseEvent=null):void {
 			log("GoogleExtension.instance.openSnapshot(\"test.txt\")");
-			GoogleExtension.instance.openSnapshot("test.txt");
+			gei.openSnapshot("test.txt");
 		}
 
 		public function doGPSaveSnapshot(e:MouseEvent=null):void {
 			log("GoogleExtension.instance.writeSnapshot(\"test.txt\", ...)");
 			var binary:ByteArray = new ByteArray();
 			binary.writeUTFBytes("hello boy");
-			GoogleExtension.instance.writeSnapshot("test.txt", binary, 0);
+			gei.writeSnapshot("test.txt", binary, 0);
 		}
 
 		public function doGPDeleteSnapshot(e:MouseEvent=null):void {
 			log("GoogleExtension.instance.deleteSnapshot(\"test.txt\")");
-			GoogleExtension.instance.deleteSnapshot("test.txt");
+			gei.deleteSnapshot("test.txt");
 		}
 
 		private function GPSonSignInSuccess(event:AirGooglePlayGamesEvent):void {
 			log("GPSonSignInSuccess: " + event.value);
 			log("\nTrying to report achievement...");
-			GoogleExtension.instance.reportAchievement("CgkIzaac840IEAIQAQ");
+			gei.reportAchievement("CgkIzaac840IEAIQAQ");
 
 //			log("\nBilling init...");
-//			GoogleExtension.instance.addEventListener(AirBillingEvent.ON_BILLING, OnBilling);
-//			GoogleExtension.instance.billingInit();
+//			gei.addEventListener(AirBillingEvent.ON_BILLING, OnBilling);
+//			gei.billingInit();
 		}
 		private function GPSonSignOutSuccess(event:AirGooglePlayGamesEvent):void {
 			log("GPSonSignOutSuccess: " + event);
@@ -189,7 +193,7 @@ package
 			var name:String = event.value;
 			log("GPSonSnapshotOpen: " + name);
 
-			var baCloud:ByteArray = GoogleExtension.instance.readSnapshot(name);
+			var baCloud:ByteArray = gei.readSnapshot(name);
 			if (baCloud) {
 				log("Snapshot bytes: " + baCloud.length);
 			} else {
@@ -205,14 +209,14 @@ package
 			log("OnBilling: " + event.value);
 			switch(event.value) {
 				case "setupFinished":
-					log("Is billing ready? "+ GoogleExtension.instance.billingReady()+" <- should be true here.");
+					log("Is billing ready? "+ gei.billingReady()+" <- should be true here.");
 
 					
 					//log("User canceled billing test: "
-					//	+GoogleExtension.instance.doPayment("android.test.canceled")
+					//	+gei.doPayment("android.test.canceled")
 					//);					
 
-					var purchases:String = GoogleExtension.instance.doQueryPurchases("inapp"); //sync
+					var purchases:String = gei.doQueryPurchases("inapp"); //sync
 					log("doQueryPurchases: " + purchases+"\n"); 					
 					break;
 				case "onPurchasesUpdated|0":
@@ -240,26 +244,26 @@ package
 
 		public function purchaseTest(e:MouseEvent=null):void {
 			log("Test billing purchase: "
-				+GoogleExtension.instance.doPayment("android.test.purchased")
+				+gei.doPayment("android.test.purchased")
 			);
 			
 		}
 		public function consumeTest(e:MouseEvent=null):void {
 			log("Consuming product: ..android.test.purchased.")
-			GoogleExtension.instance.consumeProduct("inapp:com.amanitadesign.TestAmanitaAndroidANE:android.test.purchased");
+			gei.consumeProduct("inapp:com.amanitadesign.TestAmanitaAndroidANE:android.test.purchased");
 		}
 
 		public function unavailableTest(e:MouseEvent=null):void {
 			log("Trying to buy unavailable item...");
-			GoogleExtension.instance.doPayment("android.test.item_unavailable");
+			gei.doPayment("android.test.item_unavailable");
 		}
 
 		public function beerTest(e:MouseEvent=null):void {
-			log("doPayment (chuchel.pivo): "+ GoogleExtension.instance.doPayment("chuchel.pivo") );
+			log("doPayment (chuchel.pivo): "+ gei.doPayment("chuchel.pivo") );
 		}
 		public function querySKUTest(e:MouseEvent=null):void {
 			log("doQuerySKU (chuchel.pivo) async...")
-			GoogleExtension.instance.doQuerySKU("chuchel.pivo"); //async
+			gei.doQuerySKU("chuchel.pivo"); //async
 		}
 */
 
@@ -268,50 +272,60 @@ package
 		}
 
 		public function GPLicenseResult(event:LicenseStatusEvent):void{
+			var GPNLR:String;
+			var path:String;
+			var file:File;
 			var res:String = "status: " + event.status + " statusReason: " + event.statusReason;
 			log("GPLicenseResult: " + res);
 			
-			var GPNLR:String;
 			if(event.statusReason && event.statusReason.length > 0) GPNLR = event.statusReason;
 			
 			if (GPNLR == "followLastLicensingUrl") {
 				log("Now there should be opened Google Play store page for the app");
-				GoogleExtension.instance.followLastLicensingURL();
+				gei.followLastLicensingURL();
 				//tmQuit = setTimeout(NativeApplication.nativeApplication.exit, 100);
 				log("App should quit now as it is unlicensed!");
+				return;
 			}
 
 			if (event.status) {
 				log("App is supposed to be licensed.");
-				log("getAPKMainURL:      "+ GoogleExtension.instance.getAPKMainURL());
-				log("getAPKMainFileName: "+ GoogleExtension.instance.getAPKMainFileName());
-				log("getAPKMainFileSize: "+ GoogleExtension.instance.getAPKMainFileSize());
-				log("getExternalStorageDirectory: "+ GoogleExtension.instance.getExternalStorageDirectory());
+				log("getExternalStorageDirectory: "+ gei.getExternalStorageDirectory().nativePath);
+				log("getObbDirectory: "+ gei.getObbDirectory().nativePath);
 
-				if(!GoogleExtension.instance.hasEventListener(ExpansionStatusEvent.EXPANSION_STATUS)) {
-					GoogleExtension.instance.addEventListener(ExpansionStatusEvent.EXPANSION_STATUS, expansionFilesStatusHandler);
+				if(!gei.hasEventListener(ExpansionStatusEvent.EXPANSION_STATUS)) {
+					gei.addEventListener(ExpansionStatusEvent.EXPANSION_STATUS, expansionFilesStatusHandler);
 				}
 				try {
-					log("beginHandler getStatus "+MainOBBVersion);
-					GoogleExtension.instance.getExpansionStatus(MainOBBVersion);
+					//log("beginHandler getStatus "+MainOBBVersion);
+					gei.getExpansionStatus(MainOBBVersion);
 				} catch(e:Error) {
 					log("beginHandler getStatus E!!!!! "+e.getStackTrace());
 				}
+				path = gei.getMainOBBPath();
+				log("Main OBB should be: "+path);
+				file = new File(path);
+				log("Main OBB exists: "+ file.exists);
+
 			}
 		}
 
 		private function expansionFilesStatusHandler(e:ExpansionStatusEvent):void {
 			log("expansionFilesStatusHandler: "+" main: "+e.main+" patch: "+e.patch);
-			GoogleExtension.instance.removeEventListener(ExpansionStatusEvent.EXPANSION_STATUS, expansionFilesStatusHandler);
-			if (e.main == null) {
+			gei.removeEventListener(ExpansionStatusEvent.EXPANSION_STATUS, expansionFilesStatusHandler);
+			//log("getAPKMainURL:      "+ gei.getAPKMainURL());
+			//log("getAPKMainFileName: "+ gei.getAPKMainFileName());
+			//log("getAPKMainFileSize: "+ gei.getAPKMainFileSize());
+			log("???" + (e.main == false));
+			if (!e.main) {
 				log("OBB main file not found.. needs download!");
-				GoogleExtension.instance.addEventListener(ExpansionProgressEvent.EXPANSION_PROGRESS, expansionFilesProgressHandler);
-				GoogleExtension.instance.addEventListener(ExpansionStateEvent.EXPANSION_STATE, expansionFilesStateHandler);
+				gei.addEventListener(ExpansionProgressEvent.EXPANSION_PROGRESS, expansionFilesProgressHandler);
+				gei.addEventListener(ExpansionStateEvent.EXPANSION_STATE, expansionFilesStateHandler);
 
 				//var canWrite:Boolean = AndroidPermissions.instance.checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
 				//log("can write obb? "+canWrite);
 
-				GoogleExtension.instance.startExpansionDownload(GPPublicKey);
+				gei.startExpansionDownload(GPPublicKey);
 			}
 		}
 
@@ -337,6 +351,8 @@ package
 				case ExpansionStateEvent.STATE_PAUSED_WIFI_DISABLED:
 				case ExpansionStateEvent.STATE_PAUSED_NEED_WIFI:             msg = "Need Wi-Fi"; break;
 				case ExpansionStateEvent.STATE_COMPLETED:                    msg = "EXPANSION DOWNLOAD COMPLETED"; break;
+
+				case ExpansionStateEvent.STATE_FAILED:                       msg = "Failed!"; break;
 			}
 			log("expansionFilesStateHandler state:" + state +" msg: "+ msg);
 		}

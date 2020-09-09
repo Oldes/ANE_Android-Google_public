@@ -120,6 +120,7 @@ package com.amanitadesign
 		public function getAPKPatchFileSize(): uint   {return extContext.call("getAPKPatchFileSize") as uint; }
 		
 		public function getExternalStorageDirectory(): File { return new File(extContext.call("getExternalStorageDirectory") as String); }
+		public function getObbDirectory(): File { return new File(extContext.call("getObbDirectory") as String); }
 		public function getDeviceId(): String { return extContext.call("getDeviceId") as String; }
 		public function getPackageName(): String { return extContext.call("getPackageName") as String; }
 		public function getHostAdress(host:String): String { return extContext.call("getHostAdress", host) as String; }
@@ -298,6 +299,9 @@ package com.amanitadesign
 				extContext.call("resumeExpansionDownload");
 			}
 		}
+
+		public function getMainOBBPath():String { return extContext.call("getMainOBBPath") as String; }
+		public function getPatchOBBPath():String { return extContext.call("getPatchOBBPath") as String; }
 
 		/****************************************************
 		/*

@@ -10,6 +10,11 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.google.android.vending.expansion.downloader.impl.DownloaderService;
+import com.google.android.vending.licensing.APKExpansionPolicy;
+
+import java.io.File;
+
+import com.amanitadesign.expansion.ObbExpansionsManager;
 
 /**
  * Created by Oldes on 12/1/2016.
@@ -18,7 +23,7 @@ import com.google.android.vending.expansion.downloader.impl.DownloaderService;
 public class ExpansionFunctions {
     //private static final byte[] SALT = { 1, 42, -12, -1, 54, 98,
     //        -100, -12, 43, 2, -8, -4, 9, 5, -106, -107, -33, 45, -1, 84 };
-
+    static private final String EXPANSION_STATUS = "EXPANSION_STATUS";
     static public class ExpansionFilesStatus implements FREFunction  {
 
         @Override
@@ -39,9 +44,9 @@ public class ExpansionFunctions {
             if (GoogleExtensionContext.getPatchNumber() == 1) {
                 GoogleExtensionContext.setPatchNumber(patchNumber);
             }
-            ObbExpansionsManager manager = GoogleExtensionContext.getManager();
-            manager.getStatus();
-
+            boolean main = ObbExpansionsManager.isMainFileExists();
+            boolean patch = ObbExpansionsManager.isPatchFileExists();
+            ctx.dispatchStatusEventAsync(EXPANSION_STATUS, "found," + main + "," + patch);
             return null;
         }
     }
@@ -95,6 +100,39 @@ public class ExpansionFunctions {
                 dl.resumeDownload();
             }
             return null;
+        }
+    }
+
+    static public class GetMainOBBPath implements FREFunction {
+        @Override
+        public FREObject call(FREContext ctx, FREObject[] passedArgs) {
+            FREObject result = null;
+
+            try {
+                File file = ObbExpansionsManager.getMainOBBFile();
+                Log.d("Amanita", "obb?? "+file);
+                result = FREObject.newObject(file.getAbsolutePath());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return result;
+        }
+    }
+
+    static public class GetPatchOBBPath implements FREFunction {
+        @Override
+        public FREObject call(FREContext ctx, FREObject[] passedArgs) {
+            FREObject result = null;
+
+            try {
+                File file = ObbExpansionsManager.getPatchOBBFile();
+                result = FREObject.newObject(file.getAbsolutePath());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return result;
         }
     }
 }

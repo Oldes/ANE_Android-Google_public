@@ -64,7 +64,7 @@ public final class HttpDateTime {
         int minute;
         int second;
     }
-
+/*
     public static long parse(String timeString)
             throws IllegalArgumentException {
 
@@ -101,9 +101,9 @@ public final class HttpDateTime {
         Time time = new Time(Time.TIMEZONE_UTC);
         time.set(timeOfDay.second, timeOfDay.minute, timeOfDay.hour, date,
                 month, year);
-        return time.toMillis(false /* use isDst */);
+        return time.toMillis(false /* use isDst *//*);
     }
-
+*/
     private static int getDate(String dateString) {
         if (dateString.length() == 2) {
             return (dateString.charAt(0) - '0') * 10

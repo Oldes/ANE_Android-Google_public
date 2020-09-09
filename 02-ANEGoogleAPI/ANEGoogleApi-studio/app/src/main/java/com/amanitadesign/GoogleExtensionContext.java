@@ -25,6 +25,7 @@ import com.amanitadesign.functions.APKExpansionGetPatchURL;
 import com.amanitadesign.functions.APKgetDeviceId;
 import com.amanitadesign.functions.APKgetExternalStorageDirectory;
 import com.amanitadesign.functions.APKgetHostAdress;
+import com.amanitadesign.functions.APKgetObbDirectory;
 import com.amanitadesign.functions.APKgetPackageName;
 import com.amanitadesign.functions.CheckLicenseFunction;
 import com.amanitadesign.functions.FollowLastLicensingURL;
@@ -60,8 +61,8 @@ public class GoogleExtensionContext extends FREContext implements
 	private static Downloader loader = null;
 	private static int versionNumber = 1;
 	private static int patchNumber = 1;
-	private static ObbExpansionsManager manager = null;
-	private static ExpansionObbListener listener = null;
+	private static ObbExpansionsManager obbManager = null;
+	private static ExpansionObbListener obbListener = null;
 
 	private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 	private final int RC_SHOW_ACHIEVEMENTS = 4237;
@@ -76,16 +77,17 @@ public class GoogleExtensionContext extends FREContext implements
 		aaw = AndroidActivityWrapper.GetAndroidActivityWrapper();
 		aaw.addActivityResultListener(this);
 		aaw.addActivityStateChangeListner( this );
+		obbManager = getObbManager();
 	}
 
-	public static ObbExpansionsManager getManager()
+	public static ObbExpansionsManager getObbManager()
 	{
-		if (manager == null)
+		if (obbManager == null)
 		{
-			listener = new ExpansionObbListener();
-			manager = ObbExpansionsManager.createNewInstance(instance.getActivity().getApplicationContext(), listener);
+			obbListener = new ExpansionObbListener();
+			obbManager = ObbExpansionsManager.createNewInstance(instance.getActivity().getApplicationContext(), obbListener);
 		}
-		return manager;
+		return obbManager;
 	}
 
 	public static GoogleExtensionContext getExtensionContext()
@@ -136,8 +138,8 @@ public class GoogleExtensionContext extends FREContext implements
 			aaw = null;
 		}
 		if(null != loader) loader.destroy();
-		if(null != manager) manager = null;
-		if(null != listener) listener = null;
+		if(null != obbManager) obbManager = null;
+		if(null != obbListener) obbListener = null;
 
 		Log.d(TAG,"Context disposed.");
 	}
@@ -155,6 +157,7 @@ public class GoogleExtensionContext extends FREContext implements
 		functions.put("getAPKPatchFileName", new APKExpansionGetPatchFileName());
 		functions.put("getAPKPatchFileSize", new APKExpansionGetPatchFileSize());
 		functions.put("getExternalStorageDirectory", new APKgetExternalStorageDirectory());
+		functions.put("getObbDirectory", new APKgetObbDirectory());
 
 		functions.put("getDeviceId", new APKgetDeviceId());
 		functions.put("getPackageName", new APKgetPackageName());
@@ -178,6 +181,8 @@ public class GoogleExtensionContext extends FREContext implements
 		functions.put("startExpansionDownload", new ExpansionFunctions.StartDownload());
 		functions.put("stopExpansionDownload", new ExpansionFunctions.StopDownload());
 		functions.put("resumeExpansionDownload", new ExpansionFunctions.ResumeDownload());
+		functions.put("getMainOBBPath",  new ExpansionFunctions.GetMainOBBPath());
+		functions.put("getPatchOBBPath",  new ExpansionFunctions.GetPatchOBBPath());
 		
 //		functions.put("billingInit", new BillingFunctions.BillingInit());
 //		functions.put("billingEnd", new BillingFunctions.BillingEnd());

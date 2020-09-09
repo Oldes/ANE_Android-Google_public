@@ -55,12 +55,21 @@ public class GoogleApiHelper {
     public GoogleApiHelper(Activity activity) {
         mActivity = activity;
         // Create the client used to sign in to Google services.
-        mGoogleSignInClient = GoogleSignIn.getClient(activity,
-                new GoogleSignInOptions.Builder(
-                        GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
-                        //.requestEmail()
-                        .requestScopes(new Scope(DriveScopes.DRIVE_APPDATA))
-                        .build());
+        if(GoogleExtension.VERBOSE>1) Log.i(TAG, "creating mGoogleSignInClient");
+        try {
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    //.requestEmail()
+                    .requestScopes(Games.SCOPE_GAMES_LITE)
+                    .requestScopes(new Scope(DriveScopes.DRIVE_APPDATA))
+                    .build();
+            if(GoogleExtension.VERBOSE>1) Log.i(TAG, "GoogleSignInOptions: "+gso);
+            mGoogleSignInClient = GoogleSignIn.getClient(activity, gso);
+            if(GoogleExtension.VERBOSE>1) Log.i(TAG, "mGoogleSignInClient created with activity: "+mActivity);
+        } catch (Exception e) {
+            Log.e(TAG, "FAILED to create GoogleSignInClient");
+            e.printStackTrace();
+        }
+
     }
 
     public boolean isSignInAvailable() {
@@ -72,6 +81,7 @@ public class GoogleApiHelper {
     }
 
     public boolean signIn() {
+        if(GoogleExtension.VERBOSE>2) Log.i(TAG,"signIn");
         if (isSignedIn()) {
             GoogleExtension.extensionContext.dispatchEvent("ON_SIGN_IN_SUCCESS");
             return true;
@@ -79,10 +89,12 @@ public class GoogleApiHelper {
         if (isSignInAvailable()) {
             try {
                 Activity a = GoogleExtensionContext.getMainActivity();
+                if(GoogleExtension.VERBOSE>2) Log.e(TAG, "Starting signIn activity: "+ a);
                 a.startActivityForResult(mGoogleSignInClient.getSignInIntent(), RC_SIGN_IN);
             }
             catch (Exception e) {
-                Log.e(TAG, "FAILED signIn: "+e.toString());
+                Log.e(TAG, "FAILED signIn!");
+                e.printStackTrace();
                 return false;
             }
         }
@@ -152,7 +164,8 @@ public class GoogleApiHelper {
                             }
                         });
             } catch (Exception e) {
-                Log.e(TAG, "showAchievements() failed: "+ e);
+                Log.e(TAG, "showAchievements() failed!");
+                e.printStackTrace();
             }
 
         }
@@ -170,7 +183,8 @@ public class GoogleApiHelper {
                 mSnapshotsClient = Games.getSnapshotsClient(ctx, googleSignInAccount);
                 Games.getGamesClient(mActivity, GoogleSignIn.getLastSignedInAccount(mActivity)).setViewForPopups(mActivity.findViewById(android.R.id.content));
             } catch (Exception e) {
-                Log.e(TAG, "onConnected() error: "+ e);
+                Log.e(TAG, "onConnected() error!");
+                e.printStackTrace();
                 return;
             }
         }
@@ -210,7 +224,7 @@ public class GoogleApiHelper {
             }
         } else if(requestCode == RC_ACHIEVEMENT_UI) {
             if (resultCode == GamesActivityResultCodes.RESULT_RECONNECT_REQUIRED) {
-                Log.i(TAG,"SignOut from Achievements menu");
+                if(GoogleExtension.VERBOSE>0) Log.i(TAG,"SignOut from Achievements menu");
                 signOut();
             }
         }
@@ -336,7 +350,8 @@ public class GoogleApiHelper {
             }
             writeSnapshotData(save.getSnapshot(), save);
         } catch (Exception e) {
-            Log.e(TAG, "Failed saveSnapshot: " + e);
+            Log.e(TAG, "Failed saveSnapshot!");
+            e.printStackTrace();
         }
     }
 
@@ -364,7 +379,8 @@ public class GoogleApiHelper {
                 //openSnapshot(save.getName()); //for later use
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed writeSnapshotData: " + e);
+            Log.e(TAG, "Failed writeSnapshotData!");
+            e.printStackTrace();
         }
     }
 

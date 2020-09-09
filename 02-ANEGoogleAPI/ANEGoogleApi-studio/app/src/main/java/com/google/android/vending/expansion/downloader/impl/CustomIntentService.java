@@ -72,21 +72,29 @@ public abstract class CustomIntentService extends Service {
 
     protected abstract boolean shouldStop();
 
+    // This is the old onStart method that will be called on the pre-2.0
+    // platform.  On 2.0 or later we override onStartCommand() so this
+    // method will not be called.
     @Override
-    public void onStart(Intent paramIntent, int startId) {
-        if (!this.mServiceHandler.hasMessages(WHAT_MESSAGE)) {
-            Message localMessage = this.mServiceHandler.obtainMessage();
-            localMessage.arg1 = startId;
-            localMessage.obj = paramIntent;
-            localMessage.what = WHAT_MESSAGE;
-            this.mServiceHandler.sendMessage(localMessage);
-        }
+    @SuppressWarnings( "deprecation" )
+    public void onStart(Intent intent, int startId) {
+        handleStart(intent, startId);
     }
 
     @Override
-    public int onStartCommand(Intent paramIntent, int flags, int startId) {
-        onStart(paramIntent, startId);
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        handleStart(intent, startId);
         return mRedelivery ? START_REDELIVER_INTENT : START_NOT_STICKY;
+    }
+
+    void handleStart(Intent intent, int startId) {
+        if (!this.mServiceHandler.hasMessages(WHAT_MESSAGE)) {
+            Message localMessage = this.mServiceHandler.obtainMessage();
+            localMessage.arg1 = startId;
+            localMessage.obj = intent;
+            localMessage.what = WHAT_MESSAGE;
+            this.mServiceHandler.sendMessage(localMessage);
+        }
     }
 
     public void setIntentRedelivery(boolean enabled) {

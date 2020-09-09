@@ -151,7 +151,7 @@ public class APKExpansionPolicy implements Policy {
             setValidityTimestamp(Long.toString(System.currentTimeMillis() + MILLIS_PER_MINUTE));
             Set<String> keys = extras.keySet();
             for (String key : keys) {
-                //Log.d(TAG, "LicensingKey: "+ key +" = "+ extras.get(key));
+                Log.d(TAG, "LicensingKey: "+ key +" = "+ extras.get(key));
                 if (key.equals("VT")) {
                     setValidityTimestamp(extras.get(key));
                 } else if (key.equals("GT")) {

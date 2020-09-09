@@ -16,6 +16,7 @@
 
 package com.google.android.vending.expansion.downloader.impl;
 
+import com.amanitadesign.GoogleExtension;
 import com.google.android.vending.expansion.downloader.Constants;
 import com.google.android.vending.expansion.downloader.DownloadProgressInfo;
 import com.google.android.vending.expansion.downloader.DownloaderServiceMarshaller;
@@ -30,6 +31,7 @@ import com.google.android.vending.licensing.LicenseCheckerCallback;
 import com.google.android.vending.licensing.Policy;
 
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -66,7 +68,7 @@ public abstract class DownloaderService extends CustomIntentService implements I
         super("LVLDownloadService");
     }
 
-    private static final String LOG_TAG = "LVLDL";
+    private static final String LOG_TAG = "Amanita_LVLDL";
 
     // the following NETWORK_* constants are used to indicates specific reasons
     // for disallowing a
@@ -497,10 +499,10 @@ public abstract class DownloaderService extends CustomIntentService implements I
                         break;
                     case TelephonyManager.NETWORK_TYPE_LTE: // 4G
                     case TelephonyManager.NETWORK_TYPE_EHRPD: // 3G ++ interop
-                                                              // with 4G
+                        // with 4G
                     case TelephonyManager.NETWORK_TYPE_HSPAP: // 3G ++ but
-                                                              // marketed as
-                                                              // 4G
+                        // marketed as
+                        // 4G
                         mIsAtLeast3G = true;
                         mIsAtLeast4G = true;
                         break;
@@ -678,17 +680,22 @@ public abstract class DownloaderService extends CustomIntentService implements I
         // proceed
         if (isLVLCheckRequired(db, pi)) {
             status = LVL_CHECK_REQUIRED;
+            if (GoogleExtension.VERBOSE > 1) Log.d(LOG_TAG, "LVL_CHECK_REQUIRED");
         }
+        if (GoogleExtension.VERBOSE > 1) Log.d(LOG_TAG, "db.mStatus="+db.mStatus);
         // we don't have to update LVL. do we still have a download to start?
         if (db.mStatus == 0) {
             DownloadInfo[] infos = db.getDownloads();
             if (null != infos) {
                 for (DownloadInfo info : infos) {
+                    if (GoogleExtension.VERBOSE > 1) Log.d(LOG_TAG, "doesFileExist: "+info.mFileName+" uri: "+ info.mUri);
                     if (!Helpers.doesFileExist(context, info.mFileName, info.mTotalBytes, true)) {
                         status = DOWNLOAD_REQUIRED;
+                        if (GoogleExtension.VERBOSE > 1) Log.d(LOG_TAG, "not exists... download required!");
                         db.updateStatus(-1);
                         break;
                     }
+                    if (GoogleExtension.VERBOSE > 1)  Log.d(LOG_TAG, "file found!");
                 }
             }
         } else {
@@ -700,13 +707,16 @@ public abstract class DownloaderService extends CustomIntentService implements I
                 Intent fileIntent = new Intent();
                 fileIntent.setClassName(classPackage, className);
                 fileIntent.putExtra(EXTRA_PENDING_INTENT, pendingIntent);
-
-                context.startService(fileIntent);
-
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(fileIntent);
+                }
+                else {
+                    context.startService(fileIntent);
+                }
                 break;
         }
 
-        Log.d("OBBDL", "STATUS: " + status);
+        if (GoogleExtension.VERBOSE > 1)  Log.d(LOG_TAG, "STATUS: " + status);
         return status;
     }
 
@@ -966,7 +976,7 @@ public abstract class DownloaderService extends CustomIntentService implements I
         alarms.set(
                 AlarmManager.RTC_WAKEUP,
                 System.currentTimeMillis() + wakeUp, mAlarmIntent
-                );
+        );
     }
 
     private void cancelAlarms() {
@@ -1204,6 +1214,16 @@ public abstract class DownloaderService extends CustomIntentService implements I
         }
     }
 
+    @Override
+    public int onStartCommand(Intent paramIntent, int flags, int startId) {
+        int result = super.onStartCommand(paramIntent, flags, startId);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Notification notification = mNotification.getInitialNotification();
+            startForeground(DownloadNotification.NOTIFICATION_ID, notification);
+        }
+        return result;
+    }
+
     /**
      * Exception thrown from methods called by generateSaveFile() for any fatal
      * error.
@@ -1320,7 +1340,7 @@ public abstract class DownloaderService extends CustomIntentService implements I
                         totalBytesSoFar,
                         timeRemaining,
                         mAverageDownloadSpeed)
-                );
+        );
 
     }
 

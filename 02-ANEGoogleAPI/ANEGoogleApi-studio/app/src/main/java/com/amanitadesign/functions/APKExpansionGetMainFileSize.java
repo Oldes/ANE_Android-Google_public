@@ -16,8 +16,7 @@ public class APKExpansionGetMainFileSize implements FREFunction  {
 
 		try{
 			result = FREObject.newObject(GoogleExtension.mAPKExpansionPolicy.getExpansionFileSize(APKExpansionPolicy.MAIN_FILE_URL_INDEX));
-		} catch (FREWrongThreadException e) {
-			Log.d("APKExpansion", "##### AndroidLicensing - caught FREWrongThreadException");
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 

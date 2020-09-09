@@ -18,6 +18,7 @@ public class ExpansionObbListener
 
     public void onMountSuccess()
     {
+        /*
         Log.i(GoogleExtension.TAG, "ExpansionObbListener -> onMountSuccess()");
         GoogleExtensionContext ctx = GoogleExtensionContext.getExtensionContext();
 
@@ -27,5 +28,6 @@ public class ExpansionObbListener
         boolean patch = ObbExpansionsManager.isPatchFileExists(act);
 
         ctx.dispatchStatusEventAsync(EXPANSION_STATUS, "found," + main + "," + patch);
+        */
     }
 }

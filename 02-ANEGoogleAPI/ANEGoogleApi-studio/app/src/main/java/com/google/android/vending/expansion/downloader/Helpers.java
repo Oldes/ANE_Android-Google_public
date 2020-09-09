@@ -78,7 +78,7 @@ public class Helpers {
         if (path.startsWith(cache.getPath())) {
             return cache;
         }
-        File external = Environment.getExternalStorageDirectory();
+        File external = GoogleExtension.getLegacyExternalStorageDirectory();
         if (path.startsWith(external.getPath())) {
             return external;
         }
@@ -124,7 +124,7 @@ public class Helpers {
         filename = filename.replaceFirst("/+", "/"); // normalize leading
                                                      // slashes
         return filename.startsWith(Environment.getDownloadCacheDirectory().toString())
-                || filename.startsWith(Environment.getExternalStorageDirectory().toString());
+                || filename.startsWith(GoogleExtension.getLegacyExternalStorageDirectory().toString());
     }
 
     /*
@@ -236,7 +236,7 @@ public class Helpers {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             return c.getObbDir().toString();
         } else {
-            File root = Environment.getExternalStorageDirectory();
+            File root = GoogleExtension.getLegacyExternalStorageDirectory();
             String path = root.toString() + Constants.EXP_PATH + c.getPackageName();
             return path;
         }

@@ -1,26 +1,22 @@
 package com.amanitadesign.expansion;
 
+import android.app.Activity;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Environment;
 import android.os.storage.OnObbStateChangeListener;
 import android.os.storage.StorageManager;
 import android.util.Log;
-import java.io.File;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import com.amanitadesign.GoogleExtension;
 import com.amanitadesign.GoogleExtensionContext;
 
-import androidx.core.content.pm.PackageInfoCompat;
+import java.io.File;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ObbExpansionsManager
 {
-    private String packageName;
-    private int packageVersion;
-    private int patchVersion;
     private String main;
     private File mainFile;
     private String patch;
@@ -36,198 +32,14 @@ public class ObbExpansionsManager
         this.context = context;
         this.listener = listener;
     }
-
-    public void getStatus()
-    {
-        Log.d(GoogleExtension.TAG, "Manager -> getStatus()");
-
-        this.packageName = this.context.getPackageName();
-
-        int versionCode = GoogleExtensionContext.getVersionNumber();
-        if (versionCode == 1) {
-            try
-            {
-                PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-                long longVersionCode= PackageInfoCompat.getLongVersionCode(pInfo);
-                versionCode = (int) longVersionCode; // avoid huge version numbers and you will be ok
-            }
-            catch (PackageManager.NameNotFoundException e)
-            {
-                e.printStackTrace();
-            }
+    public static String getObbDir(Context context) {
+        String dir;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            dir = context.getObbDir().getAbsolutePath();
+        } else {
+            dir = GoogleExtension.getLegacyExternalStorageDirectory().getAbsolutePath() + "/Android/obb/" + context.getPackageName();
         }
-        this.packageVersion = versionCode;
-
-        int patchCode = GoogleExtensionContext.getPatchNumber();
-        if (patchCode == 1) {
-            patchCode = this.packageVersion;
-        }
-        this.patchVersion = patchCode;
-
-        Log.i(GoogleExtension.TAG, "Manager -> getStatus() -> main version: " + this.packageVersion + " -> patchVersion: " + this.patchVersion + " -> packageName: " + this.packageName);
-
-        this.sm = ((StorageManager)this.context.getSystemService(Context.STORAGE_SERVICE));
-
-        this.patchFile = new File(Environment.getExternalStorageDirectory() + "/Android/obb/" + this.packageName + "/" +
-                "patch." + this.patchVersion + "." + this.packageName + ".obb");
-        this.mainFile = new File(Environment.getExternalStorageDirectory() + "/Android/obb/" + this.packageName + "/" +
-                "main." + this.packageVersion + "." + this.packageName + ".obb");
-        if (this.patchFile.exists())
-        {
-            if (this.sm.isObbMounted(this.patchFile.getAbsolutePath()))
-            {
-                this.patch = this.sm.getMountedObbPath(this.patchFile.getAbsolutePath());
-                requestMountMain();
-            }
-            else
-            {
-                this.mainChecker = new MountChecker(false);
-                mountPatch();
-            }
-        }
-        else {
-            requestMountMain();
-        }
-        if ((!this.mainFile.exists()) && (!this.patchFile.exists())) {
-            this.listener.onFilesNotFound();
-        }
-    }
-
-    private void requestMountMain()
-    {
-        if (this.mainChecker != null)
-        {
-            this.mainChecker.cancel();
-            this.mainChecker = null;
-        }
-        this.mainChecker = new MountChecker(true);
-        if (this.sm.isObbMounted(this.mainFile.getAbsolutePath()))
-        {
-            this.main = this.sm.getMountedObbPath(this.mainFile.getAbsolutePath());
-            this.listener.onMountSuccess();
-        }
-        else
-        {
-            mountMain();
-        }
-    }
-
-    private void mountPatch()
-    {
-        Log.i(GoogleExtension.TAG, "mountPatch()");
-
-        new Timer().schedule(this.mainChecker, 1000L);
-        this.sm.mountObb(this.patchFile.getAbsolutePath(), null, new OnObbStateChangeListener()
-        {
-            public void onObbStateChange(String path, int state)
-            {
-                Log.d(GoogleExtension.TAG, "Mounting patch file done -> state: " + state);
-                super.onObbStateChange(path, state);
-                if (state != 1) {
-                    ObbExpansionsManager.this.listener.onObbStateChange(path, state);
-                }
-            }
-        });
-    }
-
-    private void mountMain()
-    {
-        if (this.mainFile.exists())
-        {
-            Log.i(GoogleExtension.TAG, "mountMain()");
-
-            new Timer().schedule(this.mainChecker, 1000L);
-
-            this.sm.mountObb(this.mainFile.getAbsolutePath(), null, new OnObbStateChangeListener()
-            {
-                public void onObbStateChange(String path, int state)
-                {
-                    super.onObbStateChange(path, state);
-                    if (state == 1)
-                    {
-                        Log.d(GoogleExtension.TAG, "Mounting main file done.");
-                        ObbExpansionsManager.this.main = ObbExpansionsManager.this.sm.getMountedObbPath(ObbExpansionsManager.this.mainFile.getAbsolutePath());
-                        ObbExpansionsManager.this.listener.onMountSuccess();
-                        ObbExpansionsManager.this.mainChecker.cancel();
-                        ObbExpansionsManager.this.mainChecker = null;
-                    }
-                    else
-                    {
-                        ObbExpansionsManager.this.listener.onObbStateChange(path, state);
-                    }
-                }
-            });
-        }
-        else
-        {
-            Log.d(GoogleExtension.TAG, "Main file not found");
-        }
-    }
-
-    public static boolean isMainFileExists(Context context)
-    {
-        String packageName = context.getPackageName();
-        int pv = getAppVersionCode(context, false);
-        File main = new File(Environment.getExternalStorageDirectory() + "/Android/obb/" + packageName + "/" +
-                "main." + pv + "." + packageName + ".obb");
-        return main.exists();
-    }
-
-    public static boolean isPatchFileExists(Context context)
-    {
-        String packageName = context.getPackageName();
-        int pv = getAppVersionCode(context, true);
-        File patch = new File(Environment.getExternalStorageDirectory() + "/Android/obb/" + packageName + "/" +
-                "patch." + pv + "." + packageName + ".obb");
-        return patch.exists();
-    }
-
-    private static int getAppVersionCode(Context context, Boolean patch)
-    {
-        int versionCode;
-        if (!patch)
-        {
-            versionCode = GoogleExtensionContext.getVersionNumber();
-            if (versionCode == 1) {
-                try
-                {
-                    PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-                    long longVersionCode= PackageInfoCompat.getLongVersionCode(pInfo);
-                    versionCode = (int) longVersionCode;
-                }
-                catch (PackageManager.NameNotFoundException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
-        else
-        {
-            versionCode = GoogleExtensionContext.getPatchNumber();
-            if (versionCode == 1) {
-                try
-                {
-                    PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-                    long longVersionCode= PackageInfoCompat.getLongVersionCode(pInfo);
-                    versionCode = (int) longVersionCode;
-                }
-                catch (PackageManager.NameNotFoundException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return versionCode;
-    }
-
-    public String getMainRoot()
-    {
-        return this.sm.getMountedObbPath(this.mainFile.getAbsolutePath());
-    }
-
-    public String getPatchRoot()
-    {
-        return this.sm.getMountedObbPath(this.patchFile.getAbsolutePath());
+        return dir;
     }
 
     public static ObbExpansionsManager createNewInstance(Context context, ObbListener listener)
@@ -240,45 +52,31 @@ public class ObbExpansionsManager
     {
         return instance;
     }
-
-    public File getFile(String pathToFile)
-    {
-        if (!pathToFile.startsWith(File.separator)) {
-            pathToFile = File.separator + pathToFile;
+    public static File getMainOBBFile() {
+        File file = null;
+        try {
+            int packageVersion = GoogleExtensionContext.getVersionNumber();
+            Log.d("Amanita", "getMainOBBFile version: " + packageVersion);
+            String packageName = instance.context.getPackageName();
+            Log.d("Amanita", "getMainOBBFile name: " + packageName);
+            file = new File(getObbDir(instance.context)+"/main." + packageVersion + "." + packageName + ".obb");
+        } catch(Exception e) {
+            e.printStackTrace();
         }
-        File file = new File(this.patch + pathToFile);
-        if (file.exists()) {
-            return file;
-        }
-        file = new File(this.main + pathToFile);
-        if (file.exists()) {
-            return file;
-        }
-        return null;
+        return file;
     }
-
-    public File getFileFromMain(String pathToFile)
-    {
-        if (!pathToFile.startsWith(File.separator)) {
-            pathToFile = File.separator + pathToFile;
-        }
-        File file = new File(this.main + pathToFile);
-        if (file.exists()) {
-            return file;
-        }
-        return null;
+    public static File getPatchOBBFile() {
+        int packageVersion = GoogleExtensionContext.getVersionNumber();
+        String packageName = instance.context.getPackageName();
+        return new File(getObbDir(instance.context)+"/patch." + packageVersion + "." + packageName + ".obb");
     }
-
-    public File getFileFromPatch(String pathToFile)
-    {
-        if (!pathToFile.startsWith(File.separator)) {
-            pathToFile = File.separator + pathToFile;
-        }
-        File file = new File(this.patch + pathToFile);
-        if (file.exists()) {
-            return file;
-        }
-        return null;
+    public static boolean isMainFileExists() {
+        File file = getMainOBBFile();
+        return file.exists();
+    }
+    public static boolean isPatchFileExists() {
+        File file = getPatchOBBFile();
+        return file.exists();
     }
 
     public static abstract class ObbListener
@@ -318,7 +116,7 @@ public class ObbExpansionsManager
                 {
                     ObbExpansionsManager.this.patch = ObbExpansionsManager.this.sm.getMountedObbPath(file.getAbsolutePath());
 
-                    ObbExpansionsManager.this.requestMountMain();
+                    //ObbExpansionsManager.this.requestMountMain();
                 }
             }
             else
