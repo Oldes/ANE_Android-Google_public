@@ -37,9 +37,9 @@
 			<!-- Required to read and write the expansion files on shared storage -->
 			<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 			<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+			<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/> <!-- Required on Android P+ (API 28) to start foreground services. -->
 			
 			<application android:enabled="true" android:installLocation="preferExternal"> <!-- android:requestLegacyExternalStorage="true"-->
-				<receiver android:name="com.amanitadesign.expansion.AlarmReceiver"/>
 				<service android:name="com.amanitadesign.expansion.ObbDownloaderService" />
 			 	<activity android:excludeFromRecents="false" >
 					<intent-filter>
@@ -52,6 +52,8 @@
 				android:screenOrientation="portrait"
 				android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
 
+				<service  android:name="com.google.android.vending.expansion.downloader.impl.DownloaderService"               android:enabled="true"/>
+		        <receiver android:name="com.google.android.vending.expansion.downloader.impl.DownloaderService$AlarmReceiver" android:enabled="true"/>
 
 				<!-- required for billing dialog -->
 				<activity android:name="com.android.billingclient.api.ProxyBillingActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />

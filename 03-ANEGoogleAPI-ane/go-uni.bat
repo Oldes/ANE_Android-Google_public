@@ -1,7 +1,7 @@
-@SET SUPPORT_VERSION=services-18.0.1_androidx-1.1.0
+@SET SUPPORT_VERSION=services-20.0.1_androidx-1.3.1
 @SET AIR_SDK_VERSION=AIRSDK-Windows-Harman
 
-GOTO COMPI
+::GOTO COMPI
 
 @RD  /S /Q .\src\assets
 @mkdir "src\assets\platform\Android-ARM"

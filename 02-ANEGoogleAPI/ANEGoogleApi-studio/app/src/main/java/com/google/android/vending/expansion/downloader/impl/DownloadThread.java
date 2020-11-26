@@ -38,7 +38,7 @@ import java.util.Locale;
 /**
  * Runs an actual download
  */
-public class DownloadThread {
+class DownloadThread {
 
     private Context mContext;
     private DownloadInfo mInfo;
@@ -47,7 +47,7 @@ public class DownloadThread {
     private final DownloadNotification mNotification;
     private String mUserAgent;
 
-    public DownloadThread(DownloadInfo info, DownloaderService service,
+    DownloadThread(DownloadInfo info, DownloaderService service,
             DownloadNotification notification) {
         mContext = service;
         mInfo = info;

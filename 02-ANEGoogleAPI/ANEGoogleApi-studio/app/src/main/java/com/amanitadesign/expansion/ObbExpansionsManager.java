@@ -1,6 +1,8 @@
 package com.amanitadesign.expansion;
 
 import android.app.Activity;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
@@ -15,6 +17,8 @@ import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
 public class ObbExpansionsManager
 {
     private String main;
@@ -26,6 +30,8 @@ public class ObbExpansionsManager
     private Context context;
     private MountChecker mainChecker;
     private static ObbExpansionsManager instance;
+    public static final String CHANNEL_NAME = "Expansion Downloader";
+    public static final String CHANNEL_ID = "DownloadNotification";
 
     private ObbExpansionsManager(Context context, ObbListener listener)
     {
@@ -44,7 +50,10 @@ public class ObbExpansionsManager
 
     public static ObbExpansionsManager createNewInstance(Context context, ObbListener listener)
     {
-        instance = new ObbExpansionsManager(context, listener);
+        if(instance == null) {
+            instance = new ObbExpansionsManager(context, listener);
+            instance.createNotificationChannel();
+        }
         return instance;
     }
 
@@ -52,6 +61,21 @@ public class ObbExpansionsManager
     {
         return instance;
     }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance);
+            // channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(this.context, NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
     public static File getMainOBBFile() {
         File file = null;
         try {

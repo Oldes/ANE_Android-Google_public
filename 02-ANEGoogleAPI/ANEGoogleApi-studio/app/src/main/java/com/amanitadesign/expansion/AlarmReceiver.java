@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.amanitadesign.GoogleExtension;
-import com.google.android.vending.expansion.downloader.DownloaderClientMarshaller;
 
 public class AlarmReceiver
         extends BroadcastReceiver

@@ -16,6 +16,7 @@
 
 package com.google.android.vending.expansion.downloader;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
@@ -149,6 +150,7 @@ public class Helpers {
      * @return
      */
 
+    @SuppressLint("DefaultLocale")
     static public String getDownloadProgressString(long overallProgress, long overallTotal) {
         if (overallTotal == 0) {
             if (Constants.LOGVV) {
@@ -167,9 +169,6 @@ public class Helpers {
     /**
      * Adds a percentile to getDownloadProgressString.
      *
-     * @param overallProgress
-     * @param overallTotal
-     * @return
      */
     static public String getDownloadProgressStringNotification(long overallProgress,
             long overallTotal) {
@@ -194,7 +193,8 @@ public class Helpers {
     }
 
     public static String getSpeedString(float bytesPerMillisecond) {
-        return String.format("%.2f", bytesPerMillisecond * 1000 / 1024);
+        @SuppressLint("DefaultLocale") final String format = String.format("%.2f", bytesPerMillisecond * 1000 / 1024);
+        return format;
     }
 
     public static String getTimeRemaining(long durationInMilliseconds) {
@@ -223,9 +223,8 @@ public class Helpers {
      * Returns the filename (where the file should be saved) from info about a download
      */
     static public String generateSaveFileName(Context c, String fileName) {
-        String path = getSaveFilePath(c)
+        return getSaveFilePath(c)
                 + File.separator + fileName;
-        return path;
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -234,12 +233,15 @@ public class Helpers {
         // on KitKat and greater versions since it will create the
         // directory if needed
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            return c.getObbDir().toString();
-        } else {
-            File root = GoogleExtension.getLegacyExternalStorageDirectory();
-            String path = root.toString() + Constants.EXP_PATH + c.getPackageName();
-            return path;
+            final File obbDir = c.getObbDir();
+
+            if (obbDir != null ) // It really can return null in some cases. So, if it's null - go to old fallback mechanism...
+            {
+                return obbDir.toString();
+            }
         }
+        File root = GoogleExtension.getLegacyExternalStorageDirectory();
+        return root.toString() + Constants.EXP_PATH + c.getPackageName();
     }
 
     /**

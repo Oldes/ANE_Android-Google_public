@@ -62,8 +62,12 @@ public class ExpansionFunctions {
 
                 PendingIntent pendingIntent = PendingIntent.getActivity(ctx.getActivity(), 0, notifierIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                int startResult = DownloaderService.startDownloadServiceIfRequired(GoogleExtension.appContext,
-                        pendingIntent, ObbDownloaderService.class);
+                int startResult = DownloaderService.startDownloadServiceIfRequired(
+                        GoogleExtension.appContext,
+                        ObbExpansionsManager.CHANNEL_ID,
+                        pendingIntent,
+                        GoogleExtension.SALT,
+                        ObbDownloaderService.BASE64_PUBLIC_KEY);
                 Log.i(GoogleExtension.TAG, "StartDownload result: " + startResult);
                 if (startResult != DownloaderService.NO_DOWNLOAD_REQUIRED) {
                     Downloader dl = new Downloader();
